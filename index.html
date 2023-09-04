@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="styles.css">
+    <title>Mock Interview App</title>
+</head>
+<body>
+    <div class="container">
+        <h1>Mock Interview App</h1>
+        <div id="question-container">
+            <h2>Question:</h2>
+            <p id="question-text">Round마다 질문이 랜덤하게 10개 나옵니다.<br/>각 질문에 대해서 15초간 생각할 시간이 주어진 후 60초간 대답을 입력할 수 있습니다.</p>
+        </div>
+        <div id="answer-container">
+            <h2>Your Answer:</h2>
+            <textarea id="answer" rows="4" cols="50"></textarea>
+        </div>
+        <button id="start-button">Start Interview</button>
+        <button id="next-button" disabled>Next Question</button>
+        <button id="finish-button" disabled>Finish Interview</button>
+        <div id="report-container" style="display:none;">
+            <h2>Interview Report:</h2>
+            <ul id="report-list"></ul>
+        </div>
+    </div>
+
+    <div id="timer-container">
+        <div id="timer-box">
+            <h2>Time</h2>
+            <p id="timer">0</p>
+        </div>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html>
