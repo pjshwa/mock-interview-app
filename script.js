@@ -1,6 +1,5 @@
-let questions = [
+let questionsRandom = [
   "직무를 선택한 이유를 말해주세요.",
-  "지원 동기를 말해주세요.",
   "이 회사에 들어와서 하고 싶은 일은 무엇입니까?",
   "본인의 강점이 무엇인지 업무 경력을 토대로 소개해주세요.",
   "우리 회사의 제품을 사용해 본 적이 있나요? 제품을 개선할 방법이 있을까요?",
@@ -10,7 +9,7 @@ let questions = [
   "갈등 해소법이 있나요?",
   "살면서 힘들었던 일과 그 일을 극복한 방법을 말해주세요.",
   "이직을 결심하게 된 계기가 있나요?",
-  "잘하는것과 못하는것이 있나요?",
+  "잘 하는것과 못 하는것이 있나요?",
   "가장 어려웠던 고객은 누구였습니까?",
   "고객의 기대에 부응하지 못한 시간에 대해 말씀해 주십시오. 무슨 일이 있었고, 그 상황에 어떻게 대처했습니까?",
   "많은 고객을 상대할 때 고객 요구 사항을 우선적으로 처리하는 방법은 무엇입니까?",
@@ -55,9 +54,21 @@ let questions = [
   "Tell me about a time when your team gave up on something, but you pushed them to deliver results."
 ];
 
+let questionsEssential = [
+  "지원 동기를 말해주세요.",
+  "진행한 프로젝트들에 대해 요약 설명해주세요.",
+  "문제 해결 경험을 말해주세요.",
+  "향후 5년 계획을 말해주세요."
+];
+
+const questionsCount = 10;
+const responseWaitSeconds = 15;
+const responseWriteSeconds = 60;
+
 let currentQuestionIndex = 0;
 let timerInterval;
-let answers = [];
+let questions = [];
+let answers = {};
 
 const startButton = document.getElementById("start-button");
 const nextButton = document.getElementById("next-button");
@@ -76,19 +87,24 @@ function startInterview() {
   startButton.disabled = true;
   nextButton.disabled = false;
   finishButton.disabled = false;
-  shuffleArray(questions); // Shuffle questions for randomness
+
+  shuffleArray(questionsRandom);
+  questions = questionsEssential.concat(questionsRandom.slice(0, questionsCount - questionsEssential.length));
+  shuffleArray(questions);
+
   currentQuestionIndex = 0;
-  answers = []; // Clear answers
+  answers = {};
+
   displayQuestion();
 }
 
 function displayQuestion() {
-  if (currentQuestionIndex < 10) {
-      questionText.textContent = questions[currentQuestionIndex];
-      answerTextarea.value = "";
-      startTimer(15, showAnswerTextarea);
+  if (currentQuestionIndex < questionsCount) {
+    questionText.textContent = questions[currentQuestionIndex];
+    answerTextarea.value = "";
+    startTimer(responseWaitSeconds, showAnswerTextarea);
   } else {
-      finishInterview();
+    finishInterview();
   }
 }
 
@@ -96,31 +112,35 @@ function startTimer(seconds, callback) {
   clearInterval(timerInterval);
   timer.textContent = seconds;
   timerInterval = setInterval(function () {
-      seconds--;
-      timer.textContent = seconds;
-      if (seconds === 0) {
-          clearInterval(timerInterval);
-          if (callback) {
-              callback();
-          }
-      }
+    seconds--;
+    timer.textContent = seconds;
+    if (seconds === 0) {
+      clearInterval(timerInterval);
+      if (callback) callback();
+    }
   }, 1000);
 }
 
 function showAnswerTextarea() {
   answerTextarea.style.display = "block";
-  startTimer(60, () => {
-      answerTextarea.style.display = "none";
-      nextButton.disabled = false;
-      answers.push(answerTextarea.value.trim()); // Store the answer
+  startTimer(responseWriteSeconds, () => {
+    answerTextarea.style.display = "none";
+    nextButton.disabled = false;
+
+    let answer = answerTextarea.value.trim();
+    answers[currentQuestionIndex] = answer;
   });
 }
 
 function nextQuestion() {
   clearInterval(timerInterval);
+
+  let answer = answerTextarea.value.trim();
+  answers[currentQuestionIndex] = answer;
+
   currentQuestionIndex++;
   answerTextarea.style.display = "none";
-  answers.push(answerTextarea.value.trim()); // Store the answer
+
   displayQuestion();
 }
 
@@ -130,18 +150,24 @@ function finishInterview() {
   finishButton.disabled = true;
   reportContainer.style.display = "block";
   reportList.innerHTML = "";
+
   questions.slice(0, currentQuestionIndex).forEach(function (question, index) {
-      const answer = answers[index] || "No answer provided";
-      const listItem = document.createElement("li");
-      listItem.innerHTML = `<strong>Question ${index + 1}:</strong> ${question}<br><strong>Your Answer:</strong> ${answer}`;
-      reportList.appendChild(listItem);
+    const answer = answers[index] || "No answer provided";
+    const listItem = document.createElement("li");
+    listItem.innerHTML = `<strong>Question ${index + 1}:</strong> ${question}<br><strong>Your Answer:</strong> ${answer}`;
+    reportList.appendChild(listItem);
   });
 }
 
 // Shuffle an array using Fisher-Yates algorithm
 function shuffleArray(array) {
   for (let i = array.length - 1; i > 0; i--) {
-      const j = Math.floor(Math.random() * (i + 1));
-      [array[i], array[j]] = [array[j], array[i]];
+    const j = Math.floor(Math.random() * (i + 1));
+    [array[i], array[j]] = [array[j], array[i]];
   }
 }
+
+function init() {
+  questionText.innerHTML = `Round마다 질문이 랜덤하게 ${questionsCount}개 나옵니다.<br/>각 질문에 대해서 ${responseWaitSeconds}초간 생각할 시간이 주어진 후 ${responseWriteSeconds}초간 대답을 입력할 수 있습니다.`;
+}
+init();
